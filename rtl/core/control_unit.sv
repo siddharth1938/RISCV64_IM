@@ -10,8 +10,9 @@
 // Author       : Siddhartha Chinta
 // Organization : Personal Learning Project
 //
-// Target ISA   : RV64I
+// Target ISA   : RV64IM
 // Language     : SystemVerilog
+// Version      : 2.0
 //==============================================================================
 
 `timescale 1ns/1ps
@@ -22,6 +23,7 @@ module control_unit
     import riscv_opcode_pkg::*;
     import riscv_funct_pkg::*;
     import riscv_alu_pkg::*;
+    import riscv_muldiv_pkg::*;
 
 (
 
@@ -92,34 +94,80 @@ module control_unit
                 alu_src_o   = 1'b0;
                 wb_sel_o    = 2'b00;
 
-                unique case (funct3_i)
+                unique case (funct7_i)
+                    //----------------------------------------------------------
+                    // RV64I Arithmetic Instructions
+                    //----------------------------------------------------------
 
-                    F3_ADD_SUB:
-                        alu_op_o = (funct7_i == F7_SUB) ? ALU_SUB : ALU_ADD;
+                    F7_ADD: begin
 
-                    F3_SLL:
-                        alu_op_o = ALU_SLL;
+                        unique case (funct3_i)
 
-                    F3_SLT:
-                        alu_op_o = ALU_SLT;
+                            F3_ADD_SUB : alu_op_o = ALU_ADD;
+                            F3_SLL     : alu_op_o = ALU_SLL;
+                            F3_SLT     : alu_op_o = ALU_SLT;
+                            F3_SLTU    : alu_op_o = ALU_SLTU;
+                            F3_XOR     : alu_op_o = ALU_XOR;
+                            F3_SRL_SRA : alu_op_o = ALU_SRL;
+                            F3_OR      : alu_op_o = ALU_OR;
+                            F3_AND     : alu_op_o = ALU_AND;
 
-                    F3_SLTU:
-                        alu_op_o = ALU_SLTU;
+                            default    : alu_op_o = ALU_ADD;
 
-                    F3_XOR:
-                        alu_op_o = ALU_XOR;
+                        endcase
 
-                    F3_SRL_SRA:
-                        alu_op_o = (funct7_i == F7_SUB) ? ALU_SRA : ALU_SRL;
+                    end
 
-                    F3_OR:
-                        alu_op_o = ALU_OR;
+                    //----------------------------------------------------------
+                    // RV64I SUB / SRA Instructions
+                    //----------------------------------------------------------
 
-                    F3_AND:
-                        alu_op_o = ALU_AND;
+                    F7_SUB: begin
 
-                    default:
+                        unique case (funct3_i)
+
+                            F3_ADD_SUB : alu_op_o = ALU_SUB;
+                            F3_SRL_SRA : alu_op_o = ALU_SRA;
+
+                            default    : alu_op_o = ALU_ADD;
+
+                        endcase
+
+                    end
+
+                    //----------------------------------------------------------
+                    // RV64M Multiply / Divide Instructions
+                    //----------------------------------------------------------
+
+                    F7_M: begin
+
+                        unique case (funct3_i)
+
+                            F3_MUL    : alu_op_o = ALU_MUL;
+                            F3_MULH   : alu_op_o = ALU_MULH;
+                            F3_MULHSU : alu_op_o = ALU_MULHSU;
+                            F3_MULHU  : alu_op_o = ALU_MULHU;
+
+                            F3_DIV    : alu_op_o = ALU_DIV;
+                            F3_DIVU   : alu_op_o = ALU_DIVU;
+                            F3_REM    : alu_op_o = ALU_REM;
+                            F3_REMU   : alu_op_o = ALU_REMU;
+
+                            default   : alu_op_o = ALU_ADD;
+
+                        endcase
+
+                    end
+
+                    //----------------------------------------------------------
+                    // Unsupported funct7
+                    //----------------------------------------------------------
+
+                    default: begin
+
                         alu_op_o = ALU_ADD;
+
+                    end
 
                 endcase
 
@@ -136,7 +184,6 @@ module control_unit
                 wb_sel_o    = 2'b00;
 
                 unique case (funct3_i)
-
                     F3_ADD_SUB:
                         alu_op_o = ALU_ADD;
 
@@ -237,7 +284,6 @@ module control_unit
             OPCODE_JALR: begin
 
                 reg_write_o = 1'b1;
-
                 alu_src_o   = 1'b1;
 
                 wb_sel_o    = 2'b10;

@@ -34,6 +34,7 @@ module riscv64_core
     import riscv_opcode_pkg::*;
     import riscv_funct_pkg::*;
     import riscv_alu_pkg::*;
+    import riscv_muldiv_pkg::*;
 (
     input logic clk_i,
     input logic rst_ni,

@@ -14,6 +14,7 @@
 ../rtl/include/riscv_opcode_pkg.sv
 ../rtl/include/riscv_funct_pkg.sv
 ../rtl/include/riscv_alu_pkg.sv
+../rtl/include/riscv_muldiv_pkg.sv
 
 ../rtl/core/pc.sv
 ../rtl/core/instr_mem.sv
@@ -32,6 +33,8 @@
 ../rtl/core/branch_comparator.sv
 ../rtl/core/execute_stage.sv
 ../rtl/core/pc_control.sv
+../rtl/core/multiplier.sv
+../rtl/core/divider.sv
 ../rtl/core/riscv64_core.sv
 
 ../rtl/top/soc_top.sv

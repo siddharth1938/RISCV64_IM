@@ -5,13 +5,17 @@
 //
 // Description  :
 //   Performs arithmetic and logical operations for the Execute stage.
+//   Multiplication and division operations are implemented in dedicated
+//   execution units (multiplier/divider) in RV64IM.
 //
 //------------------------------------------------------------------------------
 // Author       : Siddhartha Chinta
 // Organization : Personal Learning Project
 //
-// Target ISA   : RV64I
+// Target ISA   : RV64IM
 // Language     : SystemVerilog
+//
+// Version      : 2.0
 //==============================================================================
 
 `timescale 1ns/1ps
@@ -140,6 +144,28 @@ module alu
                 result = (operand_a_i < operand_b_i)
                          ? xlen_t'(1)
                          : xlen_t'(0);
+
+            //----------------------------------------------------------
+            // RV64M Multiply Operations
+            // Implemented in multiplier.sv
+            //----------------------------------------------------------
+
+            ALU_MUL,
+            ALU_MULH,
+            ALU_MULHSU,
+            ALU_MULHU:
+                result = '0;
+
+            //----------------------------------------------------------
+            // RV64M Divide Operations
+            // Implemented in divider.sv
+            //----------------------------------------------------------
+
+            ALU_DIV,
+            ALU_DIVU,
+            ALU_REM,
+            ALU_REMU:
+                result = '0;
 
             //----------------------------------------------------------
             // Default

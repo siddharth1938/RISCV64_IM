@@ -4,15 +4,24 @@
 // File         : execute_stage.sv
 //
 // Description  :
-//   Integrates the Execute stage of the RV64I processor.
+//   Integrates the Execute stage of the RV64IM processor.
 //
 //   This module instantiates:
 //     - ALU Operand MUX
 //     - ALU
+//     - Multiplier
+//     - Divider
 //     - Branch Comparator
 //     - Branch Target Generator
 //     - JALR Target Generator
 //
+//------------------------------------------------------------------------------
+// Author       : Siddhartha Chinta
+// Organization : Personal Learning Project
+//
+// Target ISA   : RV64IM
+// Language     : SystemVerilog
+// Version      : 2.0
 //==============================================================================
 
 `timescale 1ns/1ps
@@ -45,10 +54,14 @@ module execute_stage
     // Outputs
     //--------------------------------------------------------------------------
 
-    // ALU Result
+    //==========================================================================
+    // Execution Results
+    //==========================================================================
+
+    // Pure ALU result (used for LOAD/STORE address generation)
     output xlen_t   alu_result_o,
 
-    // Branch Decision
+    
     output logic    branch_taken_o,
 
     // Branch Target Address
@@ -65,6 +78,15 @@ module execute_stage
 
     // ALU Operand B
     xlen_t alu_operand_b;
+
+    // ALU Result
+    xlen_t alu_result;
+
+    // Multiplier Result
+    xlen_t multiplier_result;
+
+    // Divider Result
+    xlen_t divider_result;
 
     // ALU Zero Flag (Unused)
     logic zero_unused;
@@ -94,10 +116,79 @@ module execute_stage
 
         .alu_op_i    (alu_op_i),
 
-        .result_o    (alu_result_o),
+        .result_o    (alu_result),
         .zero_o      (zero_unused)
 
     );
+
+    //==========================================================================
+    // Multiplier
+    //==========================================================================
+
+    multiplier u_multiplier (
+
+        .operand_a_i (rs1_data_i),
+        .operand_b_i (alu_operand_b),
+
+        .mul_op_i    (alu_op_i),
+
+        .result_o    (multiplier_result)
+
+    );
+
+    //==========================================================================
+    // Divider
+    //==========================================================================
+
+    divider u_divider (
+
+        .operand_a_i (rs1_data_i),
+        .operand_b_i (alu_operand_b),
+
+        .div_op_i    (alu_op_i),
+
+        .result_o    (divider_result)
+
+    );
+
+    //==========================================================================
+    // Execute Result Selection
+    //==========================================================================
+
+    always_comb begin
+
+        unique case (alu_op_i)
+
+            //----------------------------------------------------------
+            // Multiply Instructions
+            //----------------------------------------------------------
+
+            ALU_MUL,
+            ALU_MULH,
+            ALU_MULHSU,
+            ALU_MULHU:
+                alu_result_o = multiplier_result;
+
+            //----------------------------------------------------------
+            // Divide Instructions
+            //----------------------------------------------------------
+
+            ALU_DIV,
+            ALU_DIVU,
+            ALU_REM,
+            ALU_REMU:
+                alu_result_o = divider_result;
+
+            //----------------------------------------------------------
+            // Standard RV64I ALU Instructions
+            //----------------------------------------------------------
+
+            default:
+                alu_result_o = alu_result;
+
+        endcase
+
+    end
 
     //==========================================================================
     // Branch Comparator
