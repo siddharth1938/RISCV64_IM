@@ -4,13 +4,12 @@
 // File         : divider.sv
 //
 // Description  :
-//   Performs RV64M division and remainder operations.
+//   Placeholder Divider for Version 3.0.
 //
-//   Supported Instructions:
-//     - DIV
-//     - DIVU
-//     - REM
-//     - REMU
+//   NOTE:
+//   This module is intentionally implemented as a placeholder to allow
+//   synthesis of the complete RV64IM processor. A proper multi-cycle
+//   iterative divider will replace this implementation in a future version.
 //
 //------------------------------------------------------------------------------
 // Author       : Siddhartha Chinta
@@ -18,7 +17,7 @@
 //
 // Target ISA   : RV64IM
 // Language     : SystemVerilog
-// Version      : 2.0
+// Version      : 3.0
 //==============================================================================
 
 `timescale 1ns/1ps
@@ -56,92 +55,28 @@ module divider
     xlen_t result;
 
     //==========================================================================
-    // Combinational Divider
+    // Placeholder Divider
     //==========================================================================
 
     always_comb begin
 
-        //--------------------------------------------------------------
-        // Default
-        //--------------------------------------------------------------
-
         result = '0;
-
-        //--------------------------------------------------------------
-        // Operation Select
-        //--------------------------------------------------------------
 
         unique case (div_op_i)
 
-            //----------------------------------------------------------
-            // DIV (Signed)
-            //----------------------------------------------------------
+            //--------------------------------------------------------------
+            // Placeholder for RV64M Divide Operations
+            //--------------------------------------------------------------
 
-            ALU_DIV: begin
+            ALU_DIV,
+            ALU_DIVU,
+            ALU_REM,
+            ALU_REMU:
+                result = '0;
 
-                if (operand_b_i == 0)
-                    result = '1;
-
-                else if (($signed(operand_a_i) == -(64'sd1 << 63)) &&
-                         ($signed(operand_b_i) == -1))
-                    result = operand_a_i;
-
-                else
-                    result = $signed(operand_a_i) /
-                             $signed(operand_b_i);
-
-            end
-
-            //----------------------------------------------------------
-            // DIVU (Unsigned)
-            //----------------------------------------------------------
-
-            ALU_DIVU: begin
-
-                if (operand_b_i == 0)
-                    result = '1;
-
-                else
-                    result = operand_a_i / operand_b_i;
-
-            end
-
-            //----------------------------------------------------------
-            // REM (Signed)
-            //----------------------------------------------------------
-
-            ALU_REM: begin
-
-                if (operand_b_i == 0)
-                    result = operand_a_i;
-
-                else if (($signed(operand_a_i) == -(64'sd1 << 63)) &&
-                         ($signed(operand_b_i) == -1))
-                    result = '0;
-
-                else
-                    result = $signed(operand_a_i) %
-                             $signed(operand_b_i);
-
-            end
-
-            //----------------------------------------------------------
-            // REMU (Unsigned)
-            //----------------------------------------------------------
-
-            ALU_REMU: begin
-
-                if (operand_b_i == 0)
-                    result = operand_a_i;
-
-                else
-                    result = operand_a_i % operand_b_i;
-
-            end
-
-            //----------------------------------------------------------
+            //--------------------------------------------------------------
             // Default
-            //----------------------------------------------------------
+            //--------------------------------------------------------------
 
             default:
                 result = '0;
